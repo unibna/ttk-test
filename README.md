@@ -1,7 +1,6 @@
 # TTK Test
-
-## Puzzles
-Take the following example schema:
+## I. Puzzles
+Take the following exa. ple schema:
 - Model: Order
 	- Field: ID
 - Model: OrderStatus
@@ -24,7 +23,36 @@ Given that the database may contain millions of Orders, what optimisations would
 **Note:**
 Please use Django / Python for your solution. The logic and thought process demonstrated are the most important considerations rather than truly functional code, however code presentation is important as well as the technical aspect. If you cannot settle on a single perfect solution, you may also discuss alternative solutions to demonstrate your understanding of potential trade-offs as you encounter them. Of course if you consider a solution is too time consuming you are also welcome to clarify or elaborate on potential improvements or multiple solution approaches conceptually to demonstrate understanding and planned solution.
 
-## Solution
+## II. Setup & Run
+1. Clone project
+```
+git clone https://github.com/unibna/ttk-test.git
+```
+
+2. Build container
+```
+sudo docker-compose build
+sudo docker-compose up
+```
+After executed, API server is exposed through http://localhost:8000
+
+3. Generate testing data
+```
+docker-compose run app python manage.py setup --max-record 1000000
+```
+
+4. Call API
+In the API server, I have 4 endpoints to demonstrate for the above challenge:
+- Create order: POST http://localhost:8000/order
+- Update order: PUT http://localhost:8000/order/<id>
+- Get order detail: GET http://localhost:8000/order/<id>
+- List order: GET http://localhost:8000/order
+
+Postman Document link: https://documenter.getpostman.com/view/24525080/2s946fescu
+
+
+
+## III. Solution
 ### Puzzle 1:
 To solve puzzle 1, Django provide a method to query related fields by using double underscore notation. For instance,
 ```

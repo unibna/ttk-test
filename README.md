@@ -90,10 +90,12 @@ In the test scope, I decided to implement the following techniques to solve the 
 3. Cache
    
 **Approach 1: Pagination**
+
 Implementing pagination allows you to break large result sets into smaller, manageable chunks. This way, you can retrieve only the necessary data from the database, reducing the processing time and memory consumption. 
 
  **Approach 2: Indexing**
-     Properly indexing the database tables based on the frequently used columns can significantly speed up data retrieval operations. Indexes facilitate faster search and filtering, resulting in improved query performance.
+
+Properly indexing the database tables based on the frequently used columns can significantly speed up data retrieval operations. Indexes facilitate faster search and filtering, resulting in improved query performance.
 I defined an index on two fields: `status`,  `created_time`, and `order_id` in the `OrderStatus` model base on the requirement of the test . 
 ```
 	class  Meta:
@@ -102,7 +104,9 @@ I defined an index on two fields: `status`,  `created_time`, and `order_id` in t
 		]
 ```
 This approach can improve performance for certain types of queries:
-- **Filtering**: When performing queries that filter based on the indexed fields, the database can use the index to quickly locate the relevant rows. For example, if the user filter orders by status in frequently, the index allows the database to efficiently narrow down the relevant rows without performing a full table scan.
+- **Filtering**:
+
+When performing queries that filter based on the indexed fields, the database can use the index to quickly locate the relevant rows. For example, if the user filter orders by status in frequently, the index allows the database to efficiently narrow down the relevant rows without performing a full table scan.
 - **Sorting**: If the user need to find the oldest or newest orders, the indexing with `created_time` can speed up the sorting process. The index allows the database to retrieve the data in the required order, reducing the need for expensive sorting operations.
 - **Joining**: If we perform queries that involve joining the `OrderStatus` model with other models on the indexed fields, the index can enhance the join performance. Indexes facilitate efficient lookups in both the parent (`Order`) and child (`OrderStatus`) tables during the join. 
 

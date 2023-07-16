@@ -1,0 +1,33 @@
+version: "3"
+services:
+  app:
+    build: .
+    ports:
+      - '8000:8000'
+    volumes:
+      - .:/app
+    depends_on:
+      - postgresql
+      - redis
+    restart: always
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    restart: always
+    command: sh -c "redis-server --requirepass $$REDIS_PASSWORD"
+    environment:
+      - REDIS_PASSWORD=redis
+  postgresql:
+    image: postgres:alpine
+    command: postgres -c 'max_parallel_workers_per_gather=8'
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=ttk-test

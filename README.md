@@ -31,6 +31,7 @@ git clone https://github.com/unibna/ttk-test.git
 
 2. Build container
 ```
+cd ttk-test
 sudo docker-compose build
 sudo docker-compose up
 ```

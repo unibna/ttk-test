@@ -116,6 +116,7 @@ When performing queries that filter based on the indexed fields, the database ca
 - Besides, indexing requires additional storage space. As indexes are data structures, they consume disk space. Adding indexes on multiple columns can significantly increase the database's storage requirements.
 
 **Approach 3: Cache**
+
 Caching frequently accessed data can greatly reduce the need to retrieve it from the database repeatedly. By storing this data in memory, you can quickly serve subsequent requests, thereby improving response times.
 Without caching, each listing request with 1000 orders takes nearly 1 second to process. This delay occurs because the API has to retrieve the data from the database, and then format the response before sending it back to the client. As the number of requests increases, the database workload also escalates, leading to potential performance bottlenecks.
 However, by implementing caching, the scenario dramatically improves. After the first request, the API caches the response, which allows subsequent identical requests to be served almost instantaneously, taking around 5 milliseconds. This significant reduction in response time is because the cached data is readily available, and the API doesn't need to recompute or query the database again. Instead, it can simply serve the pre-computed response from memory, thereby minimizing database interaction and processing overhead.

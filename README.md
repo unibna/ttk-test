@@ -35,7 +35,7 @@ cd ttk-test
 sudo docker-compose build
 sudo docker-compose up
 ```
-After executed, API server is exposed through http://localhost:8000
+After executed, the API server will be runnning at http://localhost:8000
 
 3. Generate testing data
 ```

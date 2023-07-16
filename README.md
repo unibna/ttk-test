@@ -108,8 +108,12 @@ This approach can improve performance for certain types of queries:
 - **Filtering**:
 
 When performing queries that filter based on the indexed fields, the database can use the index to quickly locate the relevant rows. For example, if the user filter orders by status in frequently, the index allows the database to efficiently narrow down the relevant rows without performing a full table scan.
-- **Sorting**: If the user need to find the oldest or newest orders, the indexing with `created_time` can speed up the sorting process. The index allows the database to retrieve the data in the required order, reducing the need for expensive sorting operations.
-- **Joining**: If we perform queries that involve joining the `OrderStatus` model with other models on the indexed fields, the index can enhance the join performance. Indexes facilitate efficient lookups in both the parent (`Order`) and child (`OrderStatus`) tables during the join. 
+- **Sorting**: 
+
+If the user need to find the oldest or newest orders, the indexing with `created_time` can speed up the sorting process. The index allows the database to retrieve the data in the required order, reducing the need for expensive sorting operations.
+- **Joining**: 
+
+If we perform queries that involve joining the `OrderStatus` model with other models on the indexed fields, the index can enhance the join performance. Indexes facilitate efficient lookups in both the parent (`Order`) and child (`OrderStatus`) tables during the join. 
 
 **Trade-off:**
 - As I mentioned above, indexing is very helpful in the retrieval context. On the other side, modification actions like insert, update or delete can be slow down. This may lead to increased write latency in write-heavy workloads. 

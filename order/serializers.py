@@ -1,23 +1,25 @@
-
-from django.db.models import fields
 from rest_framework import serializers
-from .models import Order, OrderStatus
- 
+from . import models
+
 
 class OrderStatusSerializer(serializers.ModelSerializer):
     class Meta:
-        model = OrderStatus
-        fields = '__all__'
-        exclude_fields = ['order']
-        read_only_fields = [
-            'id',
-            'created_time',
-        ]
-
+        model = models.OrderStatus
+        fields = "__all__"
 
 class OrderSerializer(serializers.ModelSerializer):
     order_statuses = OrderStatusSerializer(many=True, read_only=True)
-    
+
     class Meta:
-        model = Order
-        fields = ('id', 'order_statuses')
+        model = models.Order
+        fields = "__all__"
+
+class OrderStatusSerializer2(serializers.ModelSerializer):
+    class Meta:
+        model = models.OrderStatus2
+        fields = "__all__"
+
+class OrderSerializer2(serializers.ModelSerializer):
+    class Meta:
+        model = models.Order2
+        fields = "__all__"

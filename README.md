@@ -31,100 +31,88 @@ git clone https://github.com/unibna/ttk-test.git
 
 2. Build container
 ```
-cd ttk-test
 sudo docker-compose build
 sudo docker-compose up
 ```
-After executed, the API server will be runnning at http://localhost:8000
+After executed, API server is exposed through http://localhost:8000
 
 3. Generate testing data
 ```
-docker-compose run app python manage.py setup --max-record 1000000
+docker-compose run app python manage.py setup --order-verion 1 --max-record 1000000
 ```
+You can change the value of verion (1, 2) to generate the order verion 1 or 2 data
 
 4. Call API
 In the API server, I have 4 endpoints to demonstrate for the above challenge:
-- Create order: POST http://localhost:8000/order
-- Update order: PUT http://localhost:8000/order/<id>
-- Get order detail: GET http://localhost:8000/order/<id>
-- List order: GET http://localhost:8000/order
 
-Postman Document link: https://documenter.getpostman.com/view/24525080/2s946fescu
-
-
-
-## III. Solution
+## III. Solutions
 ### Puzzle 1:
-To solve puzzle 1, Django provide a method to query related fields by using double underscore notation. For instance,
+
+To list all cancelled orders, we need to get the latest status of every order, and then, we filter the orders that have cancelled status.
+In Django, the implementation of this solution is:
+
 ```
-orders_queryset = models.Order.objects.prefetch_related().filter(order_statuses__status='CANCELLED')
+	# Get the latest status of orders
+	latest_status_subquery = OrderStatus.objects.\
+		filter(order=OuterRef('pk')).\
+		order_by('-created_time').\
+		values('status')[:1]
+
+	# Query all orders and annotate with the latest status
+	orders_with_latest_status = Order.objects.annotate(latest_status=Subquery(latest_status_subquery))
+
+	cancelled_orders = orders_with_latest_status.filter(latest_status=OrderStatus.STATUS_CHOICES.CANCELLED.value)
 ```
+
 The generated query is
 ```
-SELECT 
-  "order_order"."id" 
-FROM 
-  "order_order" 
-  INNER JOIN "order_orderstatus" ON (
-    "order_order"."id" = "order_orderstatus"."order_id"
-  ) 
-WHERE 
-  "order_orderstatus"."status" = 'CANCELLED' 
+	SELECT 
+	"order_order"."id", 
+	(
+		SELECT U0."status" 
+		FROM  "order_orderstatus" U0 
+		WHERE U0."order_id" = ("order_order"."id") 
+		ORDER BY U0."created_time" DESC 
+		LIMIT 1
+	) AS "latest_status" 
+	FROM "order_order" 
+	WHERE (
+		SELECT U0."status" 
+		FROM "order_orderstatus" U0 
+		WHERE U0."order_id" = ("order_order"."id") 
+		ORDER BY U0."created_time" DESC 
+		LIMIT 1
+	) = CANCELLED
 ```
-The proposed solution that involves joining two tables through the order id without altering the existing schema can help us to optimize performance and minimize the number of queries sent to the database. This approach will help us achieve better efficiency and enhance overall system performance.
-You can find the implementation in `ttk/order/views.py -> class OrderAPI -> function get(...)`.
-*Note*: To make it more general, there is some different between document and code.
 ___
 ### Puzzle 2:
-When aiming to enhance response time and optimize the database's workload, various approaches can be considered. Some of the key strategies include:
-1. Optimizing the query
-2. Applying database solutions
-3. Optimizing data structure and algorithm
-4. Restructuring the software architect
-5. Applying asynchronous, or concorrency programming
-6. Implementing the caching system
-7. Upgrade systems, and hardware resources
 
-In the test scope, I decided to implement the following techniques to solve the puzzle:
-1.  Pagination
-2.  Indexing 
-3. Cache
-   
-**Approach 1: Pagination**
-
-Implementing pagination allows you to break large result sets into smaller, manageable chunks. This way, you can retrieve only the necessary data from the database, reducing the processing time and memory consumption. 
-
- **Approach 2: Indexing**
-
-Properly indexing the database tables based on the frequently used columns can significantly speed up data retrieval operations. Indexes facilitate faster search and filtering, resulting in improved query performance.
-I defined an index on two fields: `status`,  `created_time`, and `order_id` in the `OrderStatus` model base on the requirement of the test . 
+With the above solution, we must perform the complex query to list all cancelled orders, which can make database workload more overhead. To improve the performance and reduce the burden on database, I supposes the following approaches:
+- Add field `current_status` into Order table
+	Through this appoach, the minimalized query can reduce the computation of the database. We do not traverse all order status records to get the latest of each order, instead of, just filter current_status of order. 
+-  Indexing by the new field `current_status`
+	Combinating with the new field, the performance of retrieval action will be enhance significantly via creating an index on `current_status`. The database does not traverse on all of record, but it just scan with the status.
+	
 ```
-	class  Meta:
-		indexes =  [
-			models.Index(fields=['status',  'created_time',  'order_id'])
-		]
+# Old Order schema
+class Order(models.Model):
+	pass
 ```
-This approach can improve performance for certain types of queries:
-- **Filtering**:
+```
+# New Order schema
+class Order(models.Model):
+	current_status = models.CharField(max_length=20,  choices=STATUS_CHOICES.to_choice_values())
 
-When performing queries that filter based on the indexed fields, the database can use the index to quickly locate the relevant rows. For example, if the user filter orders by status in frequently, the index allows the database to efficiently narrow down the relevant rows without performing a full table scan.
-- **Sorting**: 
+	class Meta:
+		indexes =  [models.Index(fields=['current_status'])]
+```
 
-If the user need to find the oldest or newest orders, the indexing with `created_time` can speed up the sorting process. The index allows the database to retrieve the data in the required order, reducing the need for expensive sorting operations.
-- **Joining**: 
-
-If we perform queries that involve joining the `OrderStatus` model with other models on the indexed fields, the index can enhance the join performance. Indexes facilitate efficient lookups in both the parent (`Order`) and child (`OrderStatus`) tables during the join. 
-
-**Trade-off:**
-- As I mentioned above, indexing is very helpful in the retrieval context. On the other side, modification actions like insert, update or delete can be slow down. This may lead to increased write latency in write-heavy workloads. 
-- Besides, indexing requires additional storage space. As indexes are data structures, they consume disk space. Adding indexes on multiple columns can significantly increase the database's storage requirements.
-
-**Approach 3: Cache**
-
+-  Apply caching
 Caching frequently accessed data can greatly reduce the need to retrieve it from the database repeatedly. By storing this data in memory, you can quickly serve subsequent requests, thereby improving response times.
-Without caching, each listing request with 1000 orders takes nearly 1 second to process. This delay occurs because the API has to retrieve the data from the database, and then format the response before sending it back to the client. As the number of requests increases, the database workload also escalates, leading to potential performance bottlenecks.
-However, by implementing caching, the scenario dramatically improves. After the first request, the API caches the response, which allows subsequent identical requests to be served almost instantaneously, taking around 5 milliseconds. This significant reduction in response time is because the cached data is readily available, and the API doesn't need to recompute or query the database again. Instead, it can simply serve the pre-computed response from memory, thereby minimizing database interaction and processing overhead.
 
-**Trade-off:**
-- Depending on the caching strategy and expiration settings, there might be a lag between updates in the database and the cached data becoming up-to-date. Therefore, we should consider to define the suitable caching time.
-- Caching frequently accessed data in memory can increase memory consumption. Depending on the size of the cached data and the number of cached items, it might impact server memory usage.
+	Without caching, each listing request with 1000 orders takes nearly 1 second to process. This delay occurs because the API has to retrieve the data from the database, and then format the response before sending it back to the client. As the number of requests increases, the database workload also escalates, leading to potential performance bottlenecks.
+
+	However, by implementing caching, the scenario dramatically improves. After the first request, the API caches the response, which allows subsequent identical requests to be served almost instantaneously, taking around 5 milliseconds. This significant reduction in response time is because the cached data is readily available, and the API doesn't need to recompute or query the database again. Instead, it can simply serve the pre-computed response from memory, thereby minimizing database interaction and processing overhead.
+
+-  Apply pagination
+	Implementing pagination allows you to break large result sets into smaller, manageable chunks. This way, you can retrieve only the necessary data from the database, reducing the processing time and memory consumption.

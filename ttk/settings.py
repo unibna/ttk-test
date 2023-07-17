@@ -38,8 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'django_filters',
     'rest_framework',    
-
     'order',
 ]
 
@@ -89,7 +89,7 @@ DATABASES = {
         'NAME': 'ttk-test',
         'USER': 'postgres',
         'PASSWORD': 'postgres',
-        'HOST': 'postgresql',
+        'HOST': 'postgres',
         'PORT': '5432',
     }
 }
@@ -142,7 +142,7 @@ CACHES = {
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": "redis://:redis@redis:6379/1",
         "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient"
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
         "KEY_PREFIX": "example"
     }
@@ -150,3 +150,6 @@ CACHES = {
 CACHE_TTL = 60 * 30 # second
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
+}

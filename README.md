@@ -43,7 +43,7 @@ docker-compose run app python manage.py setup --order-verion 1 --max-record 1000
 You can change the value of verion (1, 2) to generate the order verion 1 or 2 data
 
 4. Call API
-In the API server, I have 4 endpoints to demonstrate for the above challenge:
+Postman Document: https://documenter.getpostman.com/view/24525080/2s946fescu#14e8cf40-1c40-4bed-a0a8-9dbf42c6c826
 
 ## III. Solutions
 ### Puzzle 1:

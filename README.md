@@ -1,6 +1,9 @@
 # TTK Test
+
 ## I. Puzzles
+
 Take the following exa. ple schema:
+
 - Model: Order
 	- Field: ID
 - Model: OrderStatus
@@ -10,6 +13,7 @@ Take the following exa. ple schema:
 	- Field: OrderID (ForeignKey)
 
 We have a database of many Orders, and each Order has one or many OrderStatus records. Each OrderStatus row has columns for created datetime and a status of Pending/Complete/Failed. The status of every Order in the database is dictated by the most recent OrderStatus.
+
 - A Pending OrderStatus will be created for an Order when it is first created
 - Complete OrderStatus is created after successful payment
 - Cancelled is created if payment fails, or also if a Complete Order is refunded it is also given status Cancelled.
@@ -46,7 +50,8 @@ You can change the value of verion (1, 2) to generate the order verion 1 or 2 da
 Postman Document: https://documenter.getpostman.com/view/24525080/2s946fescu#14e8cf40-1c40-4bed-a0a8-9dbf42c6c826
 
 ## III. Solutions
-### Puzzle 1:
+
+### Puzzle 1
 
 To list all cancelled orders, we need to get the latest status of every order, and then, we filter the orders that have cancelled status.
 In Django, the implementation of this solution is:
@@ -85,9 +90,10 @@ The generated query is
 	) = CANCELLED
 ```
 ___
-### Puzzle 2:
+### Puzzle 2
 
 With the above solution, we must perform the complex query to list all cancelled orders, which can make database workload more overhead. To improve the performance and reduce the burden on database, I supposes the following approaches:
+
 - Add field `current_status` into Order table
 	Through this appoach, the minimalized query can reduce the computation of the database. We do not traverse all order status records to get the latest of each order, instead of, just filter current_status of order. 
 -  Indexing by the new field `current_status`
@@ -95,20 +101,20 @@ With the above solution, we must perform the complex query to list all cancelled
 	
 ```
 # Old Order schema
-class Order(models.Model):
-	pass
+	class Order(models.Model):
+		pass
 ```
 ```
 # New Order schema
-class Order(models.Model):
-	current_status = models.CharField(max_length=20,  choices=STATUS_CHOICES.to_choice_values())
+	class Order(models.Model):
+		current_status = models.CharField(max_length=20,  choices=STATUS_CHOICES.to_choice_values())
 
-	class Meta:
-		indexes =  [models.Index(fields=['current_status'])]
+		class Meta:
+			indexes =  [models.Index(fields=['current_status'])]
 ```
 
 -  Apply caching
-Caching frequently accessed data can greatly reduce the need to retrieve it from the database repeatedly. By storing this data in memory, you can quickly serve subsequent requests, thereby improving response times.
+	Caching frequently accessed data can greatly reduce the need to retrieve it from the database repeatedly. By storing this data in memory, you can quickly serve subsequent requests, thereby improving response times.
 
 	Without caching, each listing request with 1000 orders takes nearly 1 second to process. This delay occurs because the API has to retrieve the data from the database, and then format the response before sending it back to the client. As the number of requests increases, the database workload also escalates, leading to potential performance bottlenecks.
 

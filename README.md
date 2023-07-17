@@ -42,7 +42,7 @@ After executed, API server is exposed through http://localhost:8000
 
 3. Generate testing data
 ```
-docker-compose run app python manage.py setup --order-verion 1 --max-record 1000000
+docker-compose run app python manage.py setup --max-record 1000000 --order-verion 1
 ```
 You can change the value of verion (1, 2) to generate the order verion 1 or 2 data
 
@@ -116,7 +116,7 @@ With the above solution, we must perform the complex query to list all cancelled
 -  Apply caching
 	Caching frequently accessed data can greatly reduce the need to retrieve it from the database repeatedly. By storing this data in memory, you can quickly serve subsequent requests, thereby improving response times.
 
-	Without caching, each listing request with 1000 orders takes nearly 1 second to process. This delay occurs because the API has to retrieve the data from the database, and then format the response before sending it back to the client. As the number of requests increases, the database workload also escalates, leading to potential performance bottlenecks.
+	Without caching, each listing request with 1000 orders takes nearly 300ms to process. This delay occurs because the API has to retrieve the data from the database, and then format the response before sending it back to the client. As the number of requests increases, the database workload also escalates, leading to potential performance bottlenecks.
 
 	However, by implementing caching, the scenario dramatically improves. After the first request, the API caches the response, which allows subsequent identical requests to be served almost instantaneously, taking around 5 milliseconds. This significant reduction in response time is because the cached data is readily available, and the API doesn't need to recompute or query the database again. Instead, it can simply serve the pre-computed response from memory, thereby minimizing database interaction and processing overhead.
 

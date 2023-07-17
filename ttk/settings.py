@@ -147,6 +147,6 @@ CACHES = {
         "KEY_PREFIX": "example"
     }
 }
-CACHE_TTL = 30 # second
+CACHE_TTL = 60 * 30 # second
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"

@@ -33,14 +33,13 @@ class OrderViewSet2(ModelViewSet):
     serializer_class = serializers.OrderSerializer2
     queryset = models.Order2.objects.all()
     pagination_class = CustomPagination
-    filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
-    filter_fields = ['current_status']
+    filterset_class = filters.CustomOrder2Filter
 
-    @method_decorator(cache_page(CACHE_TTL))
+    # @method_decorator(cache_page(CACHE_TTL))
     def list(self, *args, **kwargs):
         return super().list(*args, **kwargs)
     
-    @method_decorator(cache_page(CACHE_TTL))
+    # @method_decorator(cache_page(CACHE_TTL))
     def retrieve(self, *args, **kwargs):
         return super().retrieve(*args, **kwargs)
 

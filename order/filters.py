@@ -1,6 +1,6 @@
 import django_filters
 from django.db.models import OuterRef, Subquery
-from .models import Order, OrderStatus
+from .models import Order, OrderStatus, Order2
 
 
 class CustomOrderFilter(django_filters.FilterSet):
@@ -24,3 +24,9 @@ class CustomOrderFilter(django_filters.FilterSet):
         return cancelled_orders
 
 
+class CustomOrder2Filter(django_filters.FilterSet):
+    class Meta:
+        model = Order2
+        fields = {
+            'current_status': ['exact', 'icontains', 'gt', 'lt'],
+        }

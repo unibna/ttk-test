@@ -89,7 +89,7 @@ DATABASES = {
         'NAME': 'ttk-test',
         'USER': 'postgres',
         'PASSWORD': 'postgres',
-        'HOST': 'postgres',
+        'HOST': 'postgresql',
         'PORT': '5432',
     }
 }

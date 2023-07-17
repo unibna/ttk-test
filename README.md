@@ -95,8 +95,10 @@ ___
 With the above solution, we must perform the complex query to list all cancelled orders, which can make database workload more overhead. To improve the performance and reduce the burden on database, I supposes the following approaches:
 
 - Add field `current_status` into Order table
+
 	Through this appoach, the minimalized query can reduce the computation of the database. We do not traverse all order status records to get the latest of each order, instead of, just filter current_status of order. 
 -  Indexing by the new field `current_status`
+
 	Combinating with the new field, the performance of retrieval action will be enhance significantly via creating an index on `current_status`. The database does not traverse on all of record, but it just scan with the status.
 	
 ```

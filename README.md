@@ -30,23 +30,29 @@ Please use Django / Python for your solution. The logic and thought process demo
 ## II. Setup & Run
 1. Clone project
 ```
-git clone https://github.com/unibna/ttk-test.git
+	git clone https://github.com/unibna/ttk-test.git
 ```
 
 2. Build container
 ```
-sudo docker-compose build
-sudo docker-compose up
+	sudo docker-compose build
+	sudo docker-compose up
 ```
 After executed, API server is exposed through http://localhost:8000
 
-3. Generate testing data
+3. Migrate
 ```
-docker-compose run app python manage.py setup --max-record 1000000 --order-verion 1
+	docker-compose run app python manage.py makemigrations order
+	docker-compose run app python manage.py migrate
+```
+
+4. Generate testing data
+```
+	docker-compose run app python manage.py setup --max-record 1000000 --order-verion 1
 ```
 You can change the value of verion (1, 2) to generate the order verion 1 or 2 data
 
-4. Call API
+5. Call API
 Postman Document: https://documenter.getpostman.com/view/24525080/2s946fescu#14e8cf40-1c40-4bed-a0a8-9dbf42c6c826
 
 ## III. Solutions

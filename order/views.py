@@ -35,11 +35,11 @@ class OrderViewSet2(ModelViewSet):
     pagination_class = CustomPagination
     filterset_class = filters.CustomOrder2Filter
 
-    # @method_decorator(cache_page(CACHE_TTL))
+    @method_decorator(cache_page(CACHE_TTL))
     def list(self, *args, **kwargs):
         return super().list(*args, **kwargs)
     
-    # @method_decorator(cache_page(CACHE_TTL))
+    @method_decorator(cache_page(CACHE_TTL))
     def retrieve(self, *args, **kwargs):
         return super().retrieve(*args, **kwargs)
 
